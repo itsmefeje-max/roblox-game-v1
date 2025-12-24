@@ -1,5 +1,5 @@
 -- humanoidAnimatePlayEmote.lua
-
+-- used for player animations r6 in my game 
 local Figure = script.Parent
 local Torso = Figure:WaitForChild("Torso")
 local RightShoulder = Torso:WaitForChild("Right Shoulder")
