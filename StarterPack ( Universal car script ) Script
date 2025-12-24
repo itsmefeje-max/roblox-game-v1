@@ -1,4 +1,5 @@
--- lets players  hold the car above its head. it requires a " Root " Part and a " Handle" Part this scripts parent is the Tool
+-- Let players Hold ALL cars in their inventory by using this
+
 local Tool = script.Parent
 local Handle = Tool:WaitForChild("Handle")
 
@@ -6,7 +7,7 @@ local Handle = Tool:WaitForChild("Handle")
 local HEIGHT_OFFSET = 5 
 -- =================
 
--- 1. THE GLUE (Keeps the car attached to the Root box)
+-- 1. THE GLUE
 local function weldModel(model, primaryPart)
 	for _, part in pairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= primaryPart then
@@ -18,7 +19,7 @@ local function weldModel(model, primaryPart)
 	end
 end
 
--- 2. THE GHOST (Safety physics)
+-- 2. THE GHOST
 local function makeGhost(model)
 	for _, part in pairs(model:GetDescendants()) do
 		if part:IsA("BasePart") then
@@ -31,27 +32,28 @@ local function makeGhost(model)
 end
 
 Tool.Equipped:Connect(function()
-	local CarModel = Tool:FindFirstChild("Riva") 
+	-- 🔄 UNIVERSAL CHANGE: Look for ANY model inside the tool
+	local CarModel = Tool:FindFirstChildWhichIsA("Model")
 	
 	if CarModel then
 		if CarModel.PrimaryPart then
-			-- A. GLUE IT FIRST (So it doesn't fall out of the box)
+			-- A. GLUE
 			weldModel(CarModel, CarModel.PrimaryPart)
 			
-			-- B. MAKE IT LIGHT (So it doesn't knock you over)
+			-- B. GHOST
 			makeGhost(CarModel)
 			
-			-- C. MOVE IT (To the handle)
+			-- C. MOVE
 			local targetCFrame = Handle.CFrame * CFrame.new(0, HEIGHT_OFFSET, 0)
 			CarModel:PivotTo(targetCFrame)
 			
-			-- D. LOCK IT (To the tool)
+			-- D. LOCK
 			local Weld = Instance.new("WeldConstraint")
 			Weld.Part0 = Handle
 			Weld.Part1 = CarModel.PrimaryPart
 			Weld.Parent = Handle
 		else
-			warn("Riva is missing its PrimaryPart! Did you set it to 'Root'?")
+			warn("⚠️ Model '" .. CarModel.Name .. "' has no PrimaryPart! Did you add the Root box?")
 		end
 	end
 end)
