@@ -1,4 +1,5 @@
 StarterGui > Screen GUI (name: Sprint-GUI-Mobile ) > image Button (name: SprintButton-Mobile ) script 
+this controls the sprint button for mobile
 
 
 local UserInputService = game:GetService("UserInputService")
