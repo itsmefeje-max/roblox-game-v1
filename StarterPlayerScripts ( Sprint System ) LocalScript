@@ -1,0 +1,92 @@
+-- used for the sprinting system formy game for all devices
+local ContextActionService = game:GetService("ContextActionService")
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- === SETTINGS ===
+local WALK_SPEED = 16
+local SPRINT_SPEED = 26
+local ANIMATION_ID = "rbxassetid://103489308479400" -- Your Animation ID
+local ACTION_NAME = "SprintAction"
+
+-- === VARIABLES ===
+local runTrack = nil -- Stores the loaded animation
+
+-- Function to load the animation onto the character
+local function setupAnimation(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	local animator = humanoid:WaitForChild("Animator")
+
+	-- Create the animation object
+	local newAnim = Instance.new("Animation")
+	newAnim.AnimationId = ANIMATION_ID
+
+	-- Load it onto the humanoid
+	runTrack = animator:LoadAnimation(newAnim)
+	runTrack.Priority = Enum.AnimationPriority.Action -- High priority to override walking
+	runTrack.Looped = true
+end
+
+-- Function to handle the actual movement logic
+local function updateMovement(humanoid)
+	-- SMART CHECK: We check if speed is high (> 16) AND player is moving
+	-- This works for both PC (Shift) AND Mobile (GUI Button)
+	local isMoving = humanoid.MoveDirection.Magnitude > 0
+	local isFast = humanoid.WalkSpeed > WALK_SPEED
+
+	if isFast and isMoving then
+		if not runTrack.IsPlaying then
+			runTrack:Play()
+		end
+	else
+		-- Stop animation if standing still OR walking slow
+		if runTrack and runTrack.IsPlaying then
+			runTrack:Stop()
+		end
+	end
+end
+
+-- === MAIN INPUT HANDLER (PC ONLY) ===
+local function handleSprint(actionName, inputState, inputObject)
+	local character = player.Character
+	if not character then return end
+	local humanoid = character:FindFirstChild("Humanoid")
+	if not humanoid then return end
+
+	-- Only change speed for PC Input (Shift)
+	-- Mobile speed is handled by your other script
+	if inputState == Enum.UserInputState.Begin then
+		humanoid.WalkSpeed = SPRINT_SPEED
+		updateMovement(humanoid)
+
+	elseif inputState == Enum.UserInputState.End then
+		humanoid.WalkSpeed = WALK_SPEED
+		updateMovement(humanoid)
+	end
+end
+
+-- === CONNECTIONS ===
+local function onCharacterAdded(character)
+	setupAnimation(character)
+	local humanoid = character:WaitForChild("Humanoid")
+
+	-- 1. Check when player moves (WASD/Joystick)
+	humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
+		updateMovement(humanoid)
+	end)
+
+	-- 2. Check when speed changes (Shift Key OR Mobile Button)
+	humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		updateMovement(humanoid)
+	end)
+end
+
+-- Connect to the player immediately
+if player.Character then
+	onCharacterAdded(player.Character)
+end
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- === BIND ACTION (PC ONLY) ===
+-- The 'false' here ensures NO mobile button is created by this script
+ContextActionService:BindAction(ACTION_NAME, handleSprint, false, Enum.KeyCode.LeftShift)
