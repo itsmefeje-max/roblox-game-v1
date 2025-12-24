@@ -1,54 +1,56 @@
 StarterGui > Screen GUI (name: Sprint-GUI-Mobile ) > image Button (name: SprintButton-Mobile ) script 
 this controls the sprint button for mobile
 
-
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
-local button = script.Parent
-local screenGui = button.Parent
+local button = script.Parent -- The ImageButton
+local screenGui = button.Parent -- The Sprint-GUI-Mobile
 
 -- === CONFIGURATION ===
 local WALK_SPEED = 16
 local SPRINT_SPEED = 26
 local isSprinting = false
 
--- === 1. VISIBILITY CHECK ===
+-- === 1. VISIBILITY CHECK (The Fix) ===
 if UserInputService.TouchEnabled then
-	-- Force Visible on Mobile (Even if hidden in Studio)
+	-- IT IS MOBILE:
+	-- Force the GUI to be visible, even if you hid it in Studio
 	screenGui.Enabled = true
 	button.Visible = true
 else
-	-- Kill script on PC
+	-- IT IS PC/CONSOLE:
+	-- Force hide it and delete this script to save memory
 	screenGui.Enabled = false
 	button.Visible = false
 	script:Destroy()
 	return
 end
 
--- === 2. TOGGLE LOGIC (Tap ON / Tap OFF) ===
+-- === 2. TOGGLE LOGIC ===
 button.MouseButton1Click:Connect(function()
 	local character = player.Character
 	if not character then return end
+	
 	local humanoid = character:FindFirstChild("Humanoid")
 	if not humanoid then return end
-
+	
 	-- Flip the switch
 	isSprinting = not isSprinting
-
+	
 	if isSprinting then
-		-- == SPRINT ON ==
+		-- == SPRINT MODE ON ==
 		humanoid.WalkSpeed = SPRINT_SPEED
-		button.ImageTransparency = 0.5 -- Dim button to show it's active
+		button.ImageTransparency = 0.5 -- Visual Feedback
 	else
-		-- == SPRINT OFF ==
+		-- == SPRINT MODE OFF ==
 		humanoid.WalkSpeed = WALK_SPEED
-		button.ImageTransparency = 0 -- Reset button brightness
+		button.ImageTransparency = 0 -- Reset Feedback
 	end
 end)
 
--- Reset when character respawns
+-- Safety: Reset sprint if the character dies/respawns
 player.CharacterAdded:Connect(function()
 	isSprinting = false
 	button.ImageTransparency = 0
