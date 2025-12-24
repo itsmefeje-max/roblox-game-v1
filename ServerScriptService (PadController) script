@@ -1,0 +1,97 @@
+-- gives the ability for players to put the car onto pads 
+
+local ServerStorage = game:GetService("ServerStorage")
+local Workspace = game:GetService("Workspace")
+
+-- 📁 FOLDERS
+local LuxuryFolder = Workspace:WaitForChild("Luxury-Pads")
+local NormalFolder = Workspace:WaitForChild("Normal-Pads")
+local CarModels = ServerStorage:WaitForChild("CarModels") -- The Vault
+
+-- 🛠️ SETUP FUNCTION (Runs for every pad found)
+local function setupPad(pad)
+	-- 1. Add ClickDetector if missing
+	local cd = pad:FindFirstChild("ClickDetector")
+	if not cd then
+		cd = Instance.new("ClickDetector")
+		cd.Parent = pad
+	end
+	
+	-- 2. Create "Occupied" Tag (to check if full)
+	local occupiedVal = Instance.new("BoolValue")
+	occupiedVal.Name = "IsOccupied"
+	occupiedVal.Value = false
+	occupiedVal.Parent = pad
+	
+	-- 3. THE CLICK EVENT
+	cd.MouseClick:Connect(function(player)
+		-- A. CHECK IF FULL
+		if occupiedVal.Value == true then
+			return -- Stop if car is already there
+		end
+		
+		-- B. FUTURE OWNERSHIP CHECK (Placeholder for now)
+		-- Later, we will check: if pad.Owner.Value == player.Name then ...
+		
+		-- C. CHECK PLAYER HAND
+		local character = player.Character
+		local tool = character:FindFirstChildWhichIsA("Tool")
+		
+		if tool then
+			-- Clean name (Remove " Item")
+			local carName = tool.Name:gsub(" Item", "")
+			local realCar = CarModels:FindFirstChild(carName)
+			
+			if realCar then
+				-- D. REMOVE TOOL
+				tool:Destroy()
+				
+				-- E. PLACE CAR
+				local placedCar = realCar:Clone()
+				
+				-- 📐 POSITIONING (Using the ROOT method)
+				-- We place the car exactly on top of the pad center
+				local padTop = pad.CFrame * CFrame.new(0, pad.Size.Y / 2, 0)
+				placedCar:PivotTo(padTop)
+				
+				placedCar.Parent = pad
+				
+				-- F. LOCK IT
+				for _, part in pairs(placedCar:GetDescendants()) do
+					if part:IsA("BasePart") then
+						part.Anchored = true
+						part.CanCollide = true
+					end
+				end
+				
+				-- G. UPDATE STATUS
+				occupiedVal.Value = true
+				
+				-- H. ADD RECEIPT (For Money Script)
+				local carTag = Instance.new("StringValue")
+				carTag.Name = carName
+				carTag.Parent = player:WaitForChild("OwnedCars")
+				
+				-- Link tag to car (so we can delete it later if needed)
+				local tagLink = Instance.new("ObjectValue")
+				tagLink.Name = "MoneyTag"
+				tagLink.Value = carTag
+				tagLink.Parent = placedCar
+				
+				print(player.Name .. " placed a " .. carName)
+			else
+				print("Could not find " .. carName .. " in ServerStorage!")
+			end
+		end
+	end)
+end
+
+-- 🔄 LOOP THROUGH ALL PADS
+-- This finds every pad in your folders and applies the logic
+for _, pad in pairs(LuxuryFolder:GetChildren()) do
+	setupPad(pad)
+end
+
+for _, pad in pairs(NormalFolder:GetChildren()) do
+	setupPad(pad)
+end
