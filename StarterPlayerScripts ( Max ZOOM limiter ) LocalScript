@@ -1,4 +1,5 @@
 -- LOCAL SCRIPT : LIMIT ZOOM
+-- Limits zoom in my roblox game
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
