@@ -1,1 +1,17 @@
+-- LOCAL SCRIPT : LIMIT ZOOM
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
+-- Change the numbers to whatever you want
+local MIN_ZOOM = 10 -- how close they can see the zoom ( Standard is 0.5 )
+local MAX_ZOOM = 25 -- How far they can zoom out ( standard is 128 )
+
+-- Apply the limits
+player.CameraMinZoomDistance = MIN_ZOOM
+player.CameraMaxZoomDistance = MAX_ZOOM
+
+-- Force the camera to start at a specific distance within that range 
+if workspace.CurrentCamera then
+	-- this ensures they dont start zoomed out
+	workspace.CurrentCamera.FieldOfView = 70
+end
