@@ -6,34 +6,31 @@ local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
 local player = Players.LocalPlayer
-local button = script.Parent -- The ImageButton
-local screenGui = button.Parent -- The Sprint-GUI-Mobile
+local button = script.Parent
+local screenGui = button.Parent
 
 -- === CONFIGURATION ===
 local WALK_SPEED = 16
 local SPRINT_SPEED = 26
 local isSprinting = false
 
--- === 1. VISIBILITY CHECK (The Fix) ===
+-- === 1. VISIBILITY CHECK ===
 if UserInputService.TouchEnabled then
-	-- IT IS MOBILE:
-	-- Force the GUI to be visible, even if you hid it in Studio
+	-- Force Visible on Mobile (Even if hidden in Studio)
 	screenGui.Enabled = true
 	button.Visible = true
 else
-	-- IT IS PC/CONSOLE:
-	-- Force hide it and delete this script to save memory
+	-- Kill script on PC
 	screenGui.Enabled = false
 	button.Visible = false
 	script:Destroy()
 	return
 end
 
--- === 2. TOGGLE LOGIC ===
+-- === 2. TOGGLE LOGIC (Tap ON / Tap OFF) ===
 button.MouseButton1Click:Connect(function()
 	local character = player.Character
 	if not character then return end
-
 	local humanoid = character:FindFirstChild("Humanoid")
 	if not humanoid then return end
 
@@ -41,17 +38,17 @@ button.MouseButton1Click:Connect(function()
 	isSprinting = not isSprinting
 
 	if isSprinting then
-		-- == SPRINT MODE ON ==
+		-- == SPRINT ON ==
 		humanoid.WalkSpeed = SPRINT_SPEED
-		button.ImageTransparency = 0.5 -- Visual Feedback
+		button.ImageTransparency = 0.5 -- Dim button to show it's active
 	else
-		-- == SPRINT MODE OFF ==
+		-- == SPRINT OFF ==
 		humanoid.WalkSpeed = WALK_SPEED
-		button.ImageTransparency = 0 -- Reset Feedback
+		button.ImageTransparency = 0 -- Reset button brightness
 	end
 end)
 
--- Safety: Reset sprint if the character dies/respawns
+-- Reset when character respawns
 player.CharacterAdded:Connect(function()
 	isSprinting = false
 	button.ImageTransparency = 0
