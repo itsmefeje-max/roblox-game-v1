@@ -1,5 +1,5 @@
 -- Let players Hold ALL cars in their inventory by using this
-
+-- for ex car name is Senator then script name; Universal car scritpt Senator
 local Tool = script.Parent
 local Handle = Tool:WaitForChild("Handle")
 
