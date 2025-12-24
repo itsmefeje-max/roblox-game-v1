@@ -1,5 +1,4 @@
--- used for the sprinting system formy game for all devices
-
+-- used for the sprinting system for my game for all devices\
 local ContextActionService = game:GetService("ContextActionService")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -18,10 +17,10 @@ local isSprinting = false -- Keeps track of the toggle state
 local function setupAnimation(character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local animator = humanoid:WaitForChild("Animator")
-
+	
 	local newAnim = Instance.new("Animation")
 	newAnim.AnimationId = ANIMATION_ID
-
+	
 	runTrack = animator:LoadAnimation(newAnim)
 	runTrack.Priority = Enum.AnimationPriority.Action
 	runTrack.Looped = true
@@ -31,7 +30,7 @@ end
 local function updateMovement(humanoid)
 	local isMoving = humanoid.MoveDirection.Magnitude > 0
 	local isFast = humanoid.WalkSpeed > WALK_SPEED
-
+	
 	if isFast and isMoving then
 		if not runTrack.IsPlaying then
 			runTrack:Play()
@@ -53,16 +52,16 @@ local function handleSprint(actionName, inputState, inputObject)
 	-- LOGIC: We only care when the key is PRESSED DOWN (Begin)
 	-- We ignore when they let go (End) because this is a TOGGLE now.
 	if inputState == Enum.UserInputState.Begin then
-
+		
 		-- Flip the switch: If On -> Off. If Off -> On.
 		isSprinting = not isSprinting
-
+		
 		if isSprinting then
 			humanoid.WalkSpeed = SPRINT_SPEED
 		else
 			humanoid.WalkSpeed = WALK_SPEED
 		end
-
+		
 		-- Update animation instantly
 		updateMovement(humanoid)
 	end
@@ -73,11 +72,11 @@ local function onCharacterAdded(character)
 	isSprinting = false -- Reset toggle when respawning
 	setupAnimation(character)
 	local humanoid = character:WaitForChild("Humanoid")
-
+	
 	humanoid:GetPropertyChangedSignal("MoveDirection"):Connect(function()
 		updateMovement(humanoid)
 	end)
-
+	
 	humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
 		updateMovement(humanoid)
 	end)
@@ -90,3 +89,4 @@ player.CharacterAdded:Connect(onCharacterAdded)
 
 -- Bind Action (False = No default mobile button)
 ContextActionService:BindAction(ACTION_NAME, handleSprint, false, Enum.KeyCode.LeftShift)
+
